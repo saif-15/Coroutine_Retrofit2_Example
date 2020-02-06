@@ -1,10 +1,9 @@
 package com.stechlabs.Views
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -34,12 +33,7 @@ class MainActivity : AppCompatActivity() {
             val dialog=Dialog()
             dialog.show(supportFragmentManager,"Add")
             dialog.getValue{title:String,desc:String->
-                viewModel.addNote(NotesResponse(title,desc)).observe(
-                    this, Observer {
-                        adapter.setList(it.body()!!)
-                        recyclerview.adapter=adapter
-                    }
-                )
+                viewModel.addNote(NotesResponse(title, desc))
             }
         }
         // Swiping functionality of Recyclerview
@@ -54,10 +48,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             val note:NotesResponse=adapter.getNote(viewHolder.adapterPosition)
-               viewModel.deleteNote(note.id!!).observe(this@MainActivity, Observer {
-                   adapter.setList(it.body()!!)
-                   recyclerview.adapter=adapter
-               })
+                viewModel.deleteNote(note.id!!)
             }
         }).attachToRecyclerView(recyclerview)
 
@@ -72,12 +63,7 @@ class MainActivity : AppCompatActivity() {
             dialog.arguments=bundle
             dialog.show(supportFragmentManager,"Update")
             dialog.getValue{title:String,desc:String->
-                viewModel.updateNote(it.id!!,NotesResponse(title,desc)).observe(
-                    this, Observer {
-                        adapter.setList(it.body()!!)
-                        recyclerview.adapter=adapter
-                    }
-                )
+                viewModel.updateNote(it.id!!, NotesResponse(title, desc))
             }
         }
     }
@@ -98,10 +84,7 @@ class MainActivity : AppCompatActivity() {
         when(item.itemId){
             R.id.refresh-> refresh()
             R.id.deleteall->{
-                viewModel.deleteAllNotes().observe(this, Observer {
-                    adapter.setList(it.body()!!)
-                    recyclerview.adapter=adapter
-                })
+                viewModel.deleteAllNotes()
             }
         }
         return super.onOptionsItemSelected(item)

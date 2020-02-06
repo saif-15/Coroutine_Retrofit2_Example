@@ -1,6 +1,7 @@
 package com.stechlabs.Repository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.stechlabs.ApiBuilder.MyRetrofitBuilder
 import com.stechlabs.models.NotesResponse
 import kotlinx.coroutines.*
@@ -11,140 +12,130 @@ import retrofit2.Response
 
 object MyRepository {
 
+    private val mutableNotes: MutableLiveData<Response<List<NotesResponse>>> = MutableLiveData()
     var job:CompletableJob?=null
-    fun getNotes():LiveData<Response<List<NotesResponse>>>{
-       job= Job()
-        return object :LiveData<Response<List<NotesResponse>>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    var notes:Response<List<NotesResponse>>?
-                        CoroutineScope(IO).launch {
-                            try {
-                                notes = MyRetrofitBuilder.apibuilder.getNotes()
-                                job?.complete()
-                                withContext(Main){
-                                    value=notes
-                                }
-                            }catch (ex:java.net.ConnectException){
-                            }catch (ex:java.lang.reflect.UndeclaredThrowableException){
-                            }
+
+    fun getNotes(): LiveData<Response<List<NotesResponse>>> {
+        job = Job()
+        job?.let {
+            var temp: Response<List<NotesResponse>>?
+            CoroutineScope(IO).launch {
+                try {
+                    temp = MyRetrofitBuilder.apibuilder.getNotes()
+                    job?.complete()
+                    withContext(Main) {
+                        mutableNotes.postValue(temp)
+                    }
+                } catch (ex: java.net.ConnectException) {
+                    println("Exception caught")
+                }
+            }
+        }
+        return mutableNotes
+    }
+
+    /*    fun getNote(id:Int):LiveData<Response<NotesResponse>>{
+            job = Job()
+            job?.let {
+                var temp:Response<NotesResponse>?=null
+                CoroutineScope(IO).launch {
+                    try {
+                        temp=MyRetrofitBuilder.apibuilder.getNote(id)
+                        job?.complete()
+                        withContext(Main){
+                            mutableNotes.postValue()
                         }
+
+                    } catch (ex: java.net.ConnectException) {
+                        println("Exception caught")
                     }
                 }
             }
-        }
-    fun getNote(id:Int):LiveData<Response<NotesResponse>>{
-        job= Job()
-        return object :LiveData<Response<NotesResponse>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    CoroutineScope(IO).launch {
-                        try{
-                            val notes=MyRetrofitBuilder.apibuilder.getNote(id)
-                            job?.complete()
-                            withContext(Main){
-                                value=notes
-                            }
-                        }catch (ex:java.net.ConnectException){}
+            return mutableNotes
+        }*/
+    fun addNote(notesResponse: NotesResponse) {
+        job = Job()
+        job?.let {
+            var temp: Response<List<NotesResponse>>?
+            CoroutineScope(IO).launch {
+                try {
 
+                    MyRetrofitBuilder.apibuilder.addNote(notesResponse)
+                    temp = MyRetrofitBuilder.apibuilder.getNotes()
+                    job?.complete()
+                    withContext(Main) {
+                        mutableNotes.postValue(temp)
                     }
-                }
-            }
-        }
-    }
-    fun addNote(notesResponse: NotesResponse):LiveData<Response<List<NotesResponse>>>{
-        job= Job()
-        return object :LiveData<Response<List<NotesResponse>>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    CoroutineScope(IO).launch {
-                        try{
-                           MyRetrofitBuilder.apibuilder.addNote(notesResponse)
-                            val notes=MyRetrofitBuilder.apibuilder.getNotes()
-                            job?.complete()
-                            withContext(Main){
-                                value=notes
-                            }
-                        }catch (ex:java.net.ConnectException){}
-
-                    }
+                } catch (ex: java.net.ConnectException) {
+                    println("Exception caught")
                 }
             }
         }
     }
 
-    fun updateNote(id:Int,note:NotesResponse):LiveData<Response<List<NotesResponse>>>{
-        job= Job()
-        return object :LiveData<Response<List<NotesResponse>>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    CoroutineScope(IO).launch {
-                        try{
-                            MyRetrofitBuilder.apibuilder.updateNote(id,note)
-                            val notes=MyRetrofitBuilder.apibuilder.getNotes()
-                            job?.complete()
-                            withContext(Main){
-                                value=notes
-                            }
-                        }catch (ex:java.net.ConnectException){}
-
+    fun updateNote(id: Int, note: NotesResponse) {
+        job = Job()
+        job?.let {
+            var temp: Response<List<NotesResponse>>?
+            CoroutineScope(IO).launch {
+                try {
+                    MyRetrofitBuilder.apibuilder.updateNote(id, note)
+                    temp = MyRetrofitBuilder.apibuilder.getNotes()
+                    job?.complete()
+                    withContext(Main) {
+                        mutableNotes.postValue(temp)
                     }
+                } catch (ex: java.net.ConnectException) {
+                    println("Exception caught")
                 }
             }
         }
     }
 
-    fun deleteNote(id:Int):LiveData<Response<List<NotesResponse>>>{
-        job= Job()
-        return object :LiveData<Response<List<NotesResponse>>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    CoroutineScope(IO).launch {
-                        try{
-                            MyRetrofitBuilder.apibuilder.deleteNote(id)
-                            val notes=MyRetrofitBuilder.apibuilder.getNotes()
-                            job?.complete()
-                            withContext(Main){
-                                value=notes
-                            }
-                        }catch (ex:java.net.ConnectException){}
-
-
+    fun deleteNote(id: Int) {
+        job = Job()
+        job?.let {
+            var temp: Response<List<NotesResponse>>?
+            CoroutineScope(IO).launch {
+                try {
+                    MyRetrofitBuilder.apibuilder.deleteNote(id)
+                    temp = MyRetrofitBuilder.apibuilder.getNotes()
+                    job?.complete()
+                    withContext(Main) {
+                        mutableNotes.postValue(temp)
                     }
+
+                } catch (ex: java.net.ConnectException) {
+                    println("Exception caught")
                 }
             }
         }
     }
 
-    fun deleteAllNotes():LiveData<Response<List<NotesResponse>>>{
-        job= Job()
-        return object :LiveData<Response<List<NotesResponse>>>(){
-            override fun onActive() {
-                super.onActive()
-                job?.let {
-                    CoroutineScope(IO).launch {
-                        try{
-                            MyRetrofitBuilder.apibuilder.deleteAllNotes()
-                            val notes=MyRetrofitBuilder.apibuilder.getNotes()
-                            job?.complete()
-                            withContext(Main){
-                                value=notes
-                            }
-                        }catch (ex:java.net.ConnectException){}
-
-
+    fun deleteAllNotes() {
+        job = Job()
+        job?.let {
+            var temp: Response<List<NotesResponse>>?
+            CoroutineScope(IO).launch {
+                try {
+                    MyRetrofitBuilder.apibuilder.deleteAllNotes()
+                    temp = MyRetrofitBuilder.apibuilder.getNotes()
+                    job?.complete()
+                    withContext(Main) {
+                        mutableNotes.postValue(temp)
                     }
+                } catch (ex: java.net.ConnectException) {
+                    println("Exception caught")
                 }
             }
         }
     }
     fun cancelJobs(){
         job?.cancel()
+    }
+
+    fun observer(): LiveData<Response<List<NotesResponse>>> {
+        return mutableNotes
     }
 
 }

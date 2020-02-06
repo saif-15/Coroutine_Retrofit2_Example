@@ -2,7 +2,6 @@ package com.stechlabs.ApiBuilder
 
 
 import com.stechlabs.models.NotesResponse
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
